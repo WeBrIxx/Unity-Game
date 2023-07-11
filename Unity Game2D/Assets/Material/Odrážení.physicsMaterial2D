@@ -8,4 +8,4 @@ PhysicsMaterial2D:
   m_PrefabAsset: {fileID: 0}
   m_Name: "Odr\xE1\u017Een\xED"
   friction: 0
-  bounciness: 50
+  bounciness: 2

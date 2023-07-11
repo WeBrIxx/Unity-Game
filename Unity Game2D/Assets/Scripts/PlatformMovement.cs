@@ -8,17 +8,19 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
-    public float jumpMultiplier = 0.5f; // Násobitel pro sílu skoku pøi držení mezerníku
-    public float jumpMultiplierDuration = 1f; // Doba trvání zvýšeného skoku
+    public float chargedJumpForce = 10f; // Síla nabitého skoku
+    public float chargeDuration = 1f; // Doba nabíjení skoku
     public Transform groundCheck;
     public LayerMask groundLayer;
     public float groundCheckRadius = 0.2f;
 
     private bool isGrounded;
+    private bool isJumping = false;
+    private bool isMovementAllowed = true; // Povolení pohybu postavy
+    private bool isChargingJump = false; // Indikátor, zda se právì nabíjí skok
+    private float jumpChargeTimer = 0f; // Èasový odpoèet nabíjení skoku
     private Rigidbody2D rb;
     private bool isFacingRight = true;
-    private bool isJumping = false;
-    private float jumpMultiplierTimer = 0f;
 
     private void Awake()
     {
@@ -31,14 +33,19 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
         float moveDirection = Input.GetAxis("Horizontal");
-        rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
 
-        if (moveDirection < 0f && isFacingRight)
+        // Pohyb postavy pouze pokud je povolen a je na zemi
+        if (isMovementAllowed && isGrounded)
+        {
+            rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
+        }
+
+        if (moveDirection < 0f && isFacingRight && isGrounded)
         {
             // Otoèit postavu doleva
             Flip();
         }
-        else if (moveDirection > 0f && !isFacingRight)
+        else if (moveDirection > 0f && !isFacingRight && isGrounded)
         {
             // Otoèit postavu doprava
             Flip();
@@ -46,51 +53,63 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            Jump();
+            isChargingJump = true;
+            jumpChargeTimer = 0f;
         }
 
-        if (Input.GetKeyUp(KeyCode.Space) && isJumping)
+        if (Input.GetKey(KeyCode.Space) && isGrounded && isChargingJump)
         {
-            // Uvolnìní klávesy mezerníku zastaví vyskakování
-            ResetJumpMultiplier();
+            jumpChargeTimer += Time.deltaTime;
+
+            if (jumpChargeTimer >= chargeDuration)
+            {
+                isChargingJump = false;
+                Jump(chargedJumpForce);
+            }
         }
 
-        if (Input.GetKey(KeyCode.Space) && isJumping)
+        if (Input.GetKeyUp(KeyCode.Space) && isGrounded && isChargingJump)
         {
-            // Pokraèující podržení klávesy mezerníku zvyšuje výšku skoku
-            if (jumpMultiplierTimer < jumpMultiplierDuration)
+            if (jumpChargeTimer < 0.5f)
             {
-                jumpMultiplierTimer += Time.deltaTime;
-                rb.AddForce(new Vector2(0f, jumpForce * jumpMultiplier));
+                Jump(jumpForce);
             }
-            else
-            {
-                ResetJumpMultiplier();
-            }
+
+            isChargingJump = false;
         }
     }
 
-    private void Jump()
+    private void Jump(float force)
     {
         // Pøidání síly pro skok
-        rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+        rb.AddForce(new Vector2(0f, force), ForceMode2D.Impulse);
         isJumping = true;
-        jumpMultiplierTimer = 0f;
+
+        // Zablokování pohybu doleva a doprava pøi skoku
+        isMovementAllowed = false;
     }
 
-    private void ResetJumpMultiplier()
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        // Resetování jumpMultiplier po uplynutí doby trvání zvýšeného skoku
-        isJumping = false;
-        jumpMultiplierTimer = 0f;
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            // Povolení pohybu doleva a doprava po dopadu na zem
+            isMovementAllowed = true;
+        }
     }
 
     private void Flip()
     {
-        // Otoèit smìr, ve kterém je postava otoèena
-        isFacingRight = !isFacingRight;
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
+        if (isGrounded)
+        {
+            // Otoèit smìr, ve kterém je postava otoèena
+            isFacingRight = !isFacingRight;
+            Vector3 scale = transform.localScale;
+            scale.x *= -1;
+            transform.localScale = scale;
+        }
     }
 }
+
+
+
