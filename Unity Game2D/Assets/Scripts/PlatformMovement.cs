@@ -7,18 +7,17 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    public float jumpForce = 5f;
-    public float chargedJumpForce = 10f; // SÌla nabitÈho skoku
-    public float chargeDuration = 1f; // Doba nabÌjenÌ skoku
     public Transform groundCheck;
     public LayerMask groundLayer;
     public float groundCheckRadius = 0.2f;
+    public float maxJumpForce = 10f; // Maxim√°ln√≠ s√≠la skoku
+    public float jumpForceHoldDuration = 1f; // Doba dr≈æen√≠ tlaƒç√≠tka skoku pro maxim√°ln√≠ s√≠lu
+    public float initialJumpForce = 8f; // Zaƒç√°teƒçn√≠ s√≠la skoku
 
     private bool isGrounded;
     private bool isJumping = false;
-    private bool isMovementAllowed = true; // PovolenÌ pohybu postavy
-    private bool isChargingJump = false; // Indik·tor, zda se pr·vÏ nabÌjÌ skok
-    private float jumpChargeTimer = 0f; // »asov˝ odpoËet nabÌjenÌ skoku
+    private bool isMovementAllowed = true; // Povolen√Ω pohyb postavy
+    private float jumpForceTimer = 0f; // ƒåasov√Ω odpoƒçet dr≈æen√≠ tlaƒç√≠tka skoku
     private Rigidbody2D rb;
     private bool isFacingRight = true;
 
@@ -29,7 +28,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // Kontrola, zda je hr·Ë na povrchu
+        // Kontrola, zda je hr√°ƒç na povrchu
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
         float moveDirection = Input.GetAxis("Horizontal");
@@ -42,50 +41,45 @@ public class PlayerController : MonoBehaviour
 
         if (moveDirection < 0f && isFacingRight && isGrounded)
         {
-            // OtoËit postavu doleva
+            // Otoƒçit postavu doleva
             Flip();
         }
         else if (moveDirection > 0f && !isFacingRight && isGrounded)
         {
-            // OtoËit postavu doprava
+            // Otoƒçit postavu doprava
             Flip();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        // N√°razov√Ω skok
+        if (isGrounded)
         {
-            isChargingJump = true;
-            jumpChargeTimer = 0f;
-        }
-
-        if (Input.GetKey(KeyCode.Space) && isGrounded && isChargingJump)
-        {
-            jumpChargeTimer += Time.deltaTime;
-
-            if (jumpChargeTimer >= chargeDuration)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                isChargingJump = false;
-                Jump(chargedJumpForce);
-            }
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space) && isGrounded && isChargingJump)
-        {
-            if (jumpChargeTimer < 0.5f)
-            {
-                Jump(jumpForce);
+                isJumping = true;
+                jumpForceTimer = 0f;
             }
 
-            isChargingJump = false;
+            if (isJumping)
+            {
+                jumpForceTimer += Time.deltaTime;
+
+                if (Input.GetKeyUp(KeyCode.Space))
+                {
+                    float normalizedJumpForce = Mathf.Clamp01(jumpForceTimer / jumpForceHoldDuration);
+                    float jumpForce = initialJumpForce + (maxJumpForce - initialJumpForce) * normalizedJumpForce;
+                    Jump(jumpForce);
+                    isJumping = false;
+                }
+            }
         }
     }
 
     private void Jump(float force)
     {
-        // P¯id·nÌ sÌly pro skok
-        rb.AddForce(new Vector2(0f, force), ForceMode2D.Impulse);
-        isJumping = true;
+        // P≈ôid√°n√≠ s√≠ly pro n√°razov√Ω skok
+        rb.velocity = new Vector2(rb.velocity.x, force);
 
-        // Zablokov·nÌ pohybu doleva a doprava p¯i skoku
+        // Zablokov√°n√≠ pohybu doleva a doprava p≈ôi skoku
         isMovementAllowed = false;
     }
 
@@ -93,7 +87,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            // PovolenÌ pohybu doleva a doprava po dopadu na zem
+            // Povolen√≠ pohybu doleva a doprava po dopadu na zem
             isMovementAllowed = true;
         }
     }
@@ -102,7 +96,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isGrounded)
         {
-            // OtoËit smÏr, ve kterÈm je postava otoËena
+            // Otoƒçit smƒõr, ve kter√©m je postava otoƒçena
             isFacingRight = !isFacingRight;
             Vector3 scale = transform.localScale;
             scale.x *= -1;
@@ -110,6 +104,3 @@ public class PlayerController : MonoBehaviour
         }
     }
 }
-
-
-
