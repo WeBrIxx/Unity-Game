@@ -672,6 +672,7 @@ GameObject:
   - component: {fileID: 894538049}
   - component: {fileID: 894538048}
   - component: {fileID: 894538047}
+  - component: {fileID: 894538050}
   m_Layer: 0
   m_Name: "ryt\xED\u0159 hlava chocholka"
   m_TagString: Untagged
@@ -764,13 +765,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8840c49ba70a944eb9b1d2af11ef8a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 10
   groundCheck: {fileID: 482964462}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   groundCheckRadius: 0.2
-  maxJumpForce: 10
+  maxJumpForce: 20
   jumpForceHoldDuration: 1
   initialJumpForce: 8
 --- !u!61 &894538048
@@ -805,7 +806,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.2, y: -3.7}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -816,7 +817,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 19.2, y: 19.2}
+  m_Size: {x: 3, y: 10.5}
   m_EdgeRadius: 0
 --- !u!50 &894538049
 Rigidbody2D:
@@ -845,6 +846,27 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
+--- !u!95 &894538050
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894538041}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1044433032
 GameObject:
   m_ObjectHideFlags: 0
