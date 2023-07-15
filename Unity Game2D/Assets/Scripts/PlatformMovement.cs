@@ -20,10 +20,12 @@ public class PlayerController : MonoBehaviour
     private float jumpForceTimer = 0f; // Časový odpočet držení tlačítka skoku
     private Rigidbody2D rb;
     private bool isFacingRight = true;
+    private Animator animator;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -37,6 +39,18 @@ public class PlayerController : MonoBehaviour
         if (isMovementAllowed && isGrounded)
         {
             rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
+            if (Mathf.Abs(moveDirection) > 0f)
+            {
+                animator.SetBool("isRunning", true);
+            }
+            else
+            {
+                animator.SetBool("isRunning", false);
+            }
+        }
+        else
+        {
+            animator.SetBool("isRunning", false);
         }
 
         if (moveDirection < 0f && isFacingRight && isGrounded)
@@ -104,3 +118,4 @@ public class PlayerController : MonoBehaviour
         }
     }
 }
+
